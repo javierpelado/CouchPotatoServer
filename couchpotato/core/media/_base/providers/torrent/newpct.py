@@ -44,6 +44,7 @@ class Base(TorrentProvider):
     def _search(self, media, quality, results):
 
         data = self.getHTMLData(self.urls['search'] % (self.search_params['l'], getTitle(media), self.search_params['category_'], self.search_params['idioma_'], self.search_params['bus_de_']))
+        log.debug('search Url = %s', self.urls['search'] % (self.search_params['l'], getTitle(media), self.search_params['category_'], self.search_params['idioma_'], self.search_params['bus_de_']))
 
         if data:
 

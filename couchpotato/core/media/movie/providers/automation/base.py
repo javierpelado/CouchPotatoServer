@@ -1,4 +1,5 @@
 import time
+import traceback
 
 from couchpotato.core.event import addEvent, fireEvent
 from couchpotato.core.logger import CPLog
@@ -45,7 +46,11 @@ class Automation(AutomationBase):
 
     def search(self, name, year = None, imdb_only = False):
 
-        cache_name = name.decode('utf-8').encode('ascii', 'ignore')
+        cache_name = ''
+        try:
+            cache_name = name.decode('utf-8').encode('ascii', 'ignore')
+        except:
+            log.error('ERROR decode encode === %s', traceback.format_exc())
         prop_name = 'automation.cached.%s.%s' % (cache_name, year)
         cached_imdb = Env.prop(prop_name, default = False)
         if cached_imdb and imdb_only:
