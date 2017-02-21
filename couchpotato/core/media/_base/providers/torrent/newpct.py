@@ -69,13 +69,9 @@ class Base(TorrentProvider):
                                     if column_name == 'name':
                                         link = td.find('a')
                                         new['detail_url'] = td.find('a')['href']
+                                        new['url'] = new['detail_url']
                                         new['name'] = self._processTitle(link.get('title'), new['detail_url'])
-                                        try:
-                                            new['url'] = self.get_url(new['detail_url'])
-                                        except:
-                                            log.error('Failed getting url: %s', new['detail_url'])
-                                            continue
-                                        new['id'] = new['url']
+                                        new['id'] = new['name']
                                         new['score'] = 100
                                     elif column_name is 'size':
                                         new['size'] = self.parseSize(td.text)
@@ -112,6 +108,13 @@ class Base(TorrentProvider):
         url = re.search(r'http://tumejorserie.com/descargar/.+\.torrent', data, re.DOTALL).group()
 
         return url
+
+    def download(self, url = '', nzb_id = ''):
+        try:
+            url = self.get_url(url)
+        except:
+            log.error('Error getting torrent from: %s', url)
+        super(Base, self).download(url,nzb_id)
 
     @staticmethod
     def _processTitle(title, url):
