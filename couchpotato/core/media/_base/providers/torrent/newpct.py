@@ -62,29 +62,32 @@ class Base(TorrentProvider):
                         if len(tds) == 1:
                             continue
                         for td in tds:
-                            column_name = table_order[nr]
-                            if column_name:
+                            try:
+                                column_name = table_order[nr]
+                                if column_name:
 
-                                if column_name == 'name':
-                                    link = td.find('a')
-                                    new['detail_url'] = td.find('a')['href']
-                                    new['name'] = self._processTitle(link.get('title'), new['detail_url'])
-                                    try:
-                                        new['url'] = self.get_url(new['detail_url'])
-                                    except:
-                                        log.error('Failed getting url: %s', new['detail_url'])
-                                        continue
-                                    new['id'] = new['url']
-                                    new['score'] = 100
-                                elif column_name is 'size':
-                                    new['size'] = self.parseSize(td.text)
-                                elif column_name is 'age':
-                                    new['age'] = self.ageToDays(td.text)
-                                elif column_name is 'seeds':
-                                    new['seeders'] = tryInt(td.text)
-                                elif column_name is 'leechers':
-                                    new['leechers'] = tryInt(td.text)
-
+                                    if column_name == 'name':
+                                        link = td.find('a')
+                                        new['detail_url'] = td.find('a')['href']
+                                        new['name'] = self._processTitle(link.get('title'), new['detail_url'])
+                                        try:
+                                            new['url'] = self.get_url(new['detail_url'])
+                                        except:
+                                            log.error('Failed getting url: %s', new['detail_url'])
+                                            continue
+                                        new['id'] = new['url']
+                                        new['score'] = 100
+                                    elif column_name is 'size':
+                                        new['size'] = self.parseSize(td.text)
+                                    elif column_name is 'age':
+                                        new['age'] = self.ageToDays(td.text)
+                                    elif column_name is 'seeds':
+                                        new['seeders'] = tryInt(td.text)
+                                    elif column_name is 'leechers':
+                                        new['leechers'] = tryInt(td.text)
+                            except:
+                                log.error('Failed parsing result: %s', td)
+                                continue
                             nr += 1
 
                         # Only store verified torrents
