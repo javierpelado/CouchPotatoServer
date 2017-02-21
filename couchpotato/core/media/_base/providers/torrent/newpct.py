@@ -69,7 +69,11 @@ class Base(TorrentProvider):
                                     link = td.find('a')
                                     new['detail_url'] = td.find('a')['href']
                                     new['name'] = self._processTitle(link.get('title'), new['detail_url'])
-                                    new['url'] = self.get_url(new['detail_url'])
+                                    try:
+                                        new['url'] = self.get_url(new['detail_url'])
+                                    except:
+                                        log.error('Failed getting url: %s', new['detail_url'])
+                                        continue
                                     new['id'] = new['url']
                                     new['score'] = 100
                                 elif column_name is 'size':
