@@ -14,6 +14,7 @@ from couchpotato.core.logger import CPLog
 import six
 from six.moves import map, zip, filter
 
+from datetime import datetime, date
 
 log = CPLog(__name__)
 
@@ -270,6 +271,10 @@ def possibleTitles(raw_title):
 
     return removeDuplicate(titles)
 
+def isReleased(media_dict):
+    released = media_dict['info']['released']
+    released = datetime.strptime(released, "%Y-%m-%d")
+    return released.date() < date.today()
 
 def randomString(size = 8, chars = string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for x in range(size))

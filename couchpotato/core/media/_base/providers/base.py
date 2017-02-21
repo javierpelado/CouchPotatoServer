@@ -14,7 +14,7 @@ except ImportError:
 from couchpotato.core.event import addEvent, fireEvent
 from couchpotato.core.helpers.encoding import ss
 from couchpotato.core.helpers.variable import tryFloat, mergeDicts, md5, \
-    possibleTitles
+    possibleTitles, isReleased
 from couchpotato.core.logger import CPLog
 from couchpotato.core.plugins.base import Plugin
 from couchpotato.environment import Env
@@ -214,6 +214,9 @@ class YarrProvider(Provider):
 
         if self.isDisabled():
             return []
+
+        if not isReleased(media):
+            return[]
 
         # Login if needed
         if self.urls.get('login') and not self.login():
