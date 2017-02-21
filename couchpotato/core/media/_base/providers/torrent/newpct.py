@@ -18,7 +18,7 @@ class Base(TorrentProvider):
     url = 'http://www.newpct.com'
 
     urls = {
-        'search': 'http://www.newpct.com/index.php?l=%s&q=%s&category_=%s&idioma_=%s&bus_de_=%s'
+        'search': 'http://www.newpct.com/index.php?l=%s&q="%s"&category_=%s&idioma_=%s&bus_de_=%s'
     }
 
     search_params = {
