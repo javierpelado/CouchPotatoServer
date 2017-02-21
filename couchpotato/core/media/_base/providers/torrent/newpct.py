@@ -114,7 +114,7 @@ class Base(TorrentProvider):
             url = self.get_url(url)
         except:
             log.error('Error getting torrent from details page: %s', url)
-        super(Base, self).download(url,nzb_id)
+        return super(Base, self).download(url,nzb_id)
 
     @staticmethod
     def _processTitle(title, url):
