@@ -1,3 +1,4 @@
+
 # coding=utf-8
 import re
 import traceback
@@ -29,6 +30,8 @@ class Base(TorrentProvider):
         'bus_de_': 'All'
     }
 
+    search_cat_ids = [757, 778, 1027, 1599, 1921, 3049]
+
     cat_ids = [
         (['cam'], ['cam']),
         (['telesync'], ['ts', 'tc']),
@@ -42,60 +45,62 @@ class Base(TorrentProvider):
     cat_backup_id = None
 
     def _search(self, media, quality, results):
+        
+        for search_cat_id in self.search_cat_ids:
 
-        data = self.getHTMLData(self.urls['search'] % (self.search_params['l'], getTitle(media), self.search_params['category_'], self.search_params['idioma_'], self.search_params['bus_de_']))
-        log.debug('search Url = %s', self.urls['search'] % (self.search_params['l'], getTitle(media), self.search_params['category_'], self.search_params['idioma_'], self.search_params['bus_de_']))
+            data = self.getHTMLData(self.urls['search'] % (self.search_params['l'], getTitle(media), search_cat_id, self.search_params['idioma_'], self.search_params['bus_de_']))
+            log.debug('search Url = %s', self.urls['search'] % (self.search_params['l'], getTitle(media), self.search_params['category_'], self.search_params['idioma_'], self.search_params['bus_de_']))
 
-        if data:
+            if data:
 
-            table_order = ['age', 'name', 'size']
+                table_order = ['age', 'name', 'size']
 
-            try:
-                html = BeautifulSoup(data)
-                resultbody = html.find('table', attrs = {'id': 'categoryTable'}).find('tbody', recursive = False)
                 try:
-                    for temp in resultbody.find_all('tr'):
-                        new = {}
+                    html = BeautifulSoup(data)
+                    resultbody = html.find('table', attrs = {'id': 'categoryTable'}).find('tbody', recursive = False)
+                    try:
+                        for temp in resultbody.find_all('tr'):
+                            new = {}
 
-                        nr = 0
-                        tds = temp.find_all('td')
-                        if len(tds) == 1:
-                            continue
-                        for td in tds:
-                            try:
-                                column_name = table_order[nr]
-                                if column_name:
-
-                                    if column_name == 'name':
-                                        link = td.find('a')
-                                        new['detail_url'] = td.find('a')['href']
-                                        new['url'] = new['detail_url']
-                                        new['name'] = self._processTitle(link.get('title'), new['detail_url'])
-                                        new['id'] = new['name']
-                                        new['score'] = 100
-                                    elif column_name is 'size':
-                                        new['size'] = self.parseSize(td.text)
-                                    elif column_name is 'age':
-                                        new['age'] = self.ageToDays(td.text)
-                                    elif column_name is 'seeds':
-                                        new['seeders'] = tryInt(td.text)
-                                    elif column_name is 'leechers':
-                                        new['leechers'] = tryInt(td.text)
-                            except:
-                                log.error('Failed parsing result: %s', td)
+                            nr = 0
+                            tds = temp.find_all('td')
+                            if len(tds) == 1:
                                 continue
-                            nr += 1
+                            for td in tds:
+                                try:
+                                    column_name = table_order[nr]
+                                    if column_name:
 
-                        # Only store verified torrents
-                        if self.conf('only_verified') and not new['verified']:
-                            continue
+                                        if column_name == 'name':
+                                            link = td.find('a')
+                                            new['detail_url'] = td.find('a')['href']
+                                            new['url'] = new['detail_url']
+                                            new['name'] = self._processTitle(link.get('title'), new['detail_url'])
+                                            new['id'] = new['name']
+                                            new['score'] = 100
+                                        elif column_name is 'size':
+                                            new['size'] = self.parseSize(td.text)
+                                        elif column_name is 'age':
+                                            new['age'] = self.ageToDays(td.text)
+                                        elif column_name is 'seeds':
+                                            new['seeders'] = tryInt(td.text)
+                                        elif column_name is 'leechers':
+                                            new['leechers'] = tryInt(td.text)
+                                except:
+                                    log.error('Failed parsing result: %s', td)
+                                    continue
+                                nr += 1
 
-                        results.append(new)
-                except:
-                    log.error('Failed parsing Newpct: %s', traceback.format_exc())
+                            # Only store verified torrents
+                            if self.conf('only_verified') and not new['verified']:
+                                continue
 
-            except AttributeError:
-                log.debug('No search results found.')
+                            results.append(new)
+                    except:
+                        log.error('Failed parsing Newpct: %s', traceback.format_exc())
+
+                except AttributeError:
+                    log.debug('No search results found.')
 
     def ageToDays(self, age_str):
         upload_date = datetime.strptime(age_str, "%d-%m-%y")
