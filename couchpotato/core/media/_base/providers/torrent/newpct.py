@@ -45,7 +45,9 @@ class Base(TorrentProvider):
     cat_backup_id = None
 
     def _search(self, media, quality, results):
-        
+
+        daysFromReleased = self.ageToDays(media['info']['released'],"%Y-%m-%d")
+
         for search_cat_id in self.search_cat_ids:
 
             data = self.getHTMLData(self.urls['search'] % (self.search_params['l'], getTitle(media), search_cat_id, self.search_params['idioma_'], self.search_params['bus_de_']))
@@ -77,7 +79,6 @@ class Base(TorrentProvider):
                                             new['url'] = new['detail_url']
                                             new['name'] = self._processTitle(link.get('title'), new['detail_url'])
                                             new['id'] = new['name']
-                                            new['score'] = 100
                                         elif column_name is 'size':
                                             new['size'] = self.parseSize(td.text)
                                         elif column_name is 'age':
@@ -95,6 +96,9 @@ class Base(TorrentProvider):
                             if self.conf('only_verified') and not new['verified']:
                                 continue
 
+                            if daysFromReleased < new['age']:
+                                continue
+
                             results.append(new)
                     except:
                         log.error('Failed parsing Newpct: %s', traceback.format_exc())
@@ -102,8 +106,8 @@ class Base(TorrentProvider):
                 except AttributeError:
                     log.debug('No search results found.')
 
-    def ageToDays(self, age_str):
-        upload_date = datetime.strptime(age_str, "%d-%m-%y")
+    def ageToDays(self, age_str, pattern="%d-%m-%y"):
+        upload_date = datetime.strptime(age_str, pattern)
         today = date.today()
         age = today - upload_date.date()
         return age.days
