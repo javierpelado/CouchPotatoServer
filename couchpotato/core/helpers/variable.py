@@ -272,9 +272,12 @@ def possibleTitles(raw_title):
     return removeDuplicate(titles)
 
 def isReleased(media_dict):
-    released = media_dict['info']['released']
-    released = datetime.strptime(released, "%Y-%m-%d")
-    return released.date() < date.today()
+    try:
+        released = media_dict['info']['released']
+        released = datetime.strptime(released, "%Y-%m-%d")
+        return released.date() < date.today()
+    except:
+        return True
 
 def randomString(size = 8, chars = string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for x in range(size))
