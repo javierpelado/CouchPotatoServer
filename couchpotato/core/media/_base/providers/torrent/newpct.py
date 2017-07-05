@@ -46,7 +46,7 @@ class Base(TorrentProvider):
 
     def _search(self, media, quality, results):
 
-        daysFromReleased = self.ageToDays(media['info']['released'],"%Y-%m-%d")
+        daysFromReleased = self.daysFromReleased(media['info'])
 
         for search_cat_id in self.search_cat_ids:
 
@@ -96,7 +96,7 @@ class Base(TorrentProvider):
                             if self.conf('only_verified') and not new['verified']:
                                 continue
 
-                            if daysFromReleased < new['age']:
+                            if daysFromReleased and (daysFromReleased < new['age']):
                                 continue
 
                             results.append(new)
@@ -105,6 +105,12 @@ class Base(TorrentProvider):
 
                 except AttributeError:
                     log.debug('No search results found.')
+
+    def daysFromReleased(self, info):
+        try:
+            return self.ageToDays(info['released'], "%Y-%m-%d")
+        except:
+            return False
 
     def ageToDays(self, age_str, pattern="%d-%m-%y"):
         upload_date = datetime.strptime(age_str, pattern)
