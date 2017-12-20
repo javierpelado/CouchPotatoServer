@@ -19,7 +19,8 @@ class Base(TorrentProvider):
     url = 'http://www.newpct.com'
 
     urls = {
-        'search': 'http://www.newpct.com/index.php?l=%s&q="%s"&category_=%s&idioma_=%s&bus_de_=%s'
+        'search': 'http://www.newpct.com/index.php?l=%s&q="%s"&category_=%s&idioma_=%s&bus_de_=%s',
+        'postSearch': 'http://www.newpct.com/buscar'
     }
 
     search_params = {
@@ -28,6 +29,17 @@ class Base(TorrentProvider):
         'category_': 'All',
         'idioma_': 1,
         'bus_de_': 'All'
+    }
+
+    post_search_params = {
+        'pg': '',
+        'categoryIDR': 1027,
+        'categoryID': '',
+        'idioma': 1,
+        'calidad': '',
+        'ordenar': 'Fecha',
+        'inon': 'Descendente',
+        'q': ''
     }
 
     search_cat_ids = [757, 778, 1027, 1599, 1921, 3049]
@@ -50,7 +62,9 @@ class Base(TorrentProvider):
 
         for search_cat_id in self.search_cat_ids:
 
-            data = self.getHTMLData(self.urls['search'] % (self.search_params['l'], getTitle(media), search_cat_id, self.search_params['idioma_'], self.search_params['bus_de_']))
+            self.post_search_params['q'] = getTitle(media)
+            self.post_search_params['categoryIDR'] = search_cat_id
+            data = self.getHTMLData(self.urls['postSearch'], data=self.post_search_params)
             log.debug('search Url = %s', self.urls['search'] % (self.search_params['l'], getTitle(media), self.search_params['category_'], self.search_params['idioma_'], self.search_params['bus_de_']))
 
             if data:
@@ -58,39 +72,25 @@ class Base(TorrentProvider):
                 table_order = ['age', 'name', 'size']
 
                 try:
-                    html = BeautifulSoup(data)
-                    resultbody = html.find('table', attrs = {'id': 'categoryTable'}).find('tbody', recursive = False)
+                    html = BeautifulSoup(unicode(data, "latin-1"))
+                    result_list = html.find('ul', 'buscar-list')
                     try:
-                        for temp in resultbody.find_all('tr'):
+                        for temp in result_list.find_all('div', 'info'):
                             new = {}
 
-                            nr = 0
-                            tds = temp.find_all('td')
-                            if len(tds) == 1:
-                                continue
-                            for td in tds:
-                                try:
-                                    column_name = table_order[nr]
-                                    if column_name:
+                            try:
+                                new['detail_url'] = temp.find('a')['href']
+                                new['url'] = new['detail_url']
+                                new['name'] = self._processTitle(temp.find('h2').text, new['detail_url'])
+                                new['id'] = new['name']
 
-                                        if column_name == 'name':
-                                            link = td.find('a')
-                                            new['detail_url'] = td.find('a')['href']
-                                            new['url'] = new['detail_url']
-                                            new['name'] = self._processTitle(link.get('title'), new['detail_url'])
-                                            new['id'] = new['name']
-                                        elif column_name is 'size':
-                                            new['size'] = self.parseSize(td.text)
-                                        elif column_name is 'age':
-                                            new['age'] = self.ageToDays(td.text)
-                                        elif column_name is 'seeds':
-                                            new['seeders'] = tryInt(td.text)
-                                        elif column_name is 'leechers':
-                                            new['leechers'] = tryInt(td.text)
-                                except:
-                                    log.error('Failed parsing result: %s', td)
-                                    continue
-                                nr += 1
+                                spans = temp.find_all('span')
+                                new['age'] = self.ageToDays(spans[1].text)
+                                new['size'] = self.parseSize(spans[2].text)
+
+                            except:
+                                log.error('Failed parsing result: %s', td)
+                                continue
 
                             # Only store verified torrents
                             if self.conf('only_verified') and not new['verified']:
@@ -112,7 +112,7 @@ class Base(TorrentProvider):
         except:
             return False
 
-    def ageToDays(self, age_str, pattern="%d-%m-%y"):
+    def ageToDays(self, age_str, pattern="%d-%m-%Y"):
         upload_date = datetime.strptime(age_str, pattern)
         today = date.today()
         age = today - upload_date.date()
@@ -133,10 +133,7 @@ class Base(TorrentProvider):
 
     @staticmethod
     def _processTitle(title, url):
-        # Remove 'Mas informacion sobre ' literal from title
-        title = title[22:]
-        title = re.sub(r'[ ]{2,}', ' ', title, flags=re.I)
-
+        title = re.sub(r'\]\[', '] [', title, flags=re.I)
         # Quality - Use re module to avoid case sensitive problems with replace
         title = re.sub(r'\[HDTV 1080p?[^\[]*]', '1080p HDTV x264', title, flags=re.I)
         title = re.sub(r'\[HDTV 720p?[^\[]*]', '720p HDTV x264', title, flags=re.I)
@@ -145,10 +142,11 @@ class Base(TorrentProvider):
         title = re.sub(r'\[DVD[^\[]*]', 'DVDrip x264', title, flags=re.I)
         title = re.sub(r'\[BluRay 1080p?[^\[]*]', '1080p BluRay x264', title, flags=re.I)
         title = re.sub(r'\[BluRay Rip 1080p?[^\[]*]', '1080p BluRay x264', title, flags=re.I)
+        title = re.sub(r'\[BluRay 720p?[^\[]*]', '720p BluRay x264', title, flags=re.I)
         title = re.sub(r'\[BluRay Rip 720p?[^\[]*]', '720p BluRay x264', title, flags=re.I)
         title = re.sub(r'\[BluRay MicroHD[^\[]*]', '1080p BluRay x264', title, flags=re.I)
         title = re.sub(r'\[MicroHD 1080p?[^\[]*]', '1080p BluRay x264', title, flags=re.I)
-        title = re.sub(r'\[BLuRay[^\[]*]', '720p BluRay x264', title, flags=re.I)
+        title = re.sub(r'\[BluRay[^\[]*]', '720p BluRay x264', title, flags=re.I)
         title = re.sub(r'\[BRrip[^\[]*]', '720p BluRay x264', title, flags=re.I)
         title = re.sub(r'\[BDrip[^\[]*]', '720p BluRay x264', title, flags=re.I)
 
@@ -190,6 +188,7 @@ class Base(TorrentProvider):
         title = re.sub(r'\[Castellano[^\[]*]', 'SPANISH AUDIO', title, flags=re.I)
         title = re.sub(ur'\[Español[^\[]*]', 'SPANISH AUDIO', title, flags=re.I)
         title = re.sub(ur'\[AC3 5\.1 Español[^\[]*]', 'SPANISH AUDIO', title, flags=re.I)
+        title = re.sub(ur'\[AC3 5\.1 Castellano[^\[]*]', 'SPANISH AUDIO', title, flags=re.I)
 
         if re.search(r'\[V.O.[^\[]*]', title, flags=re.I):
             title += '-NEWPCTVO'
