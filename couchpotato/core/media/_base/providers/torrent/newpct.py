@@ -119,8 +119,10 @@ class Base(TorrentProvider):
         return age.days
 
     def get_url(self, url):
+
+        url = url.replace('newpct.com', 'tumejortorrent.com')
         data = self.getHTMLData(url)
-        url = re.search(r'http://tumejorserie.com/descargar/.+\.torrent', data, re.DOTALL).group()
+        url = re.search(r'http://tumejortorrent.com/descargar-torrent/\d+_[^\"]+', data, re.DOTALL).group()
 
         return url
 
