@@ -16,11 +16,11 @@ log = CPLog(__name__)
 
 class Base(TorrentProvider):
 
-    url = 'http://www.newpct.com'
+    baseurl = 'http://www.tvsinpagar.com'
 
     urls = {
-        'search': 'http://www.newpct.com/index.php?l=%s&q="%s"&category_=%s&idioma_=%s&bus_de_=%s',
-        'postSearch': 'http://www.newpct.com/buscar'
+        'search': 'http://www.tvsinpagar.com/index.php?l=%s&q="%s"&category_=%s&idioma_=%s&bus_de_=%s',
+        'postSearch': 'http://www.tvsinpagar.com/buscar'
     }
 
     search_params = {
@@ -64,8 +64,8 @@ class Base(TorrentProvider):
 
             self.post_search_params['q'] = getTitle(media)
             self.post_search_params['categoryIDR'] = search_cat_id
-            data = self.getHTMLData(self.urls['postSearch'], data=self.post_search_params)
-            log.debug('search Url = %s', self.urls['search'] % (self.search_params['l'], getTitle(media), self.search_params['category_'], self.search_params['idioma_'], self.search_params['bus_de_']))
+            data = self.getHTMLData(self.urls['postSearch'], data = self.post_search_params)
+            log.debug('search Url = %s', self.urls['postSearch'])
 
             if data:
 
@@ -73,9 +73,8 @@ class Base(TorrentProvider):
 
                 try:
                     html = BeautifulSoup(unicode(data, "latin-1"))
-                    result_list = html.find('ul', 'buscar-list')
                     try:
-                        for temp in result_list.find_all('div', 'info'):
+                        for temp in html.find_all('div', 'info'):
                             new = {}
 
                             try:
@@ -122,7 +121,7 @@ class Base(TorrentProvider):
 
         url = url.replace('newpct.com', 'tumejortorrent.com')
         data = self.getHTMLData(url)
-        url = re.search(r'http://tumejortorrent.com/descargar-torrent/\d+_[^\"]+', data, re.DOTALL).group()
+        url = re.search(r'http://www.tvsinpagar.com/descargar-torrent/\d+_[^\"]+', data, re.DOTALL).group()
 
         return url
 
