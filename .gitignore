@@ -16,3 +16,4 @@ nosetests.xml
 /.vs
 
 \.idea/
+.DS_Store

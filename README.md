@@ -2,8 +2,8 @@ CouchPotato
 =====
 
 [![Join the chat at https://gitter.im/CouchPotato/CouchPotatoServer](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/CouchPotato/CouchPotatoServer?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Build Status](https://travis-ci.org/CouchPotato/CouchPotatoServer.svg?branch=develop)](https://travis-ci.org/CouchPotato/CouchPotatoServer)
-[![Coverage Status](https://coveralls.io/repos/CouchPotato/CouchPotatoServer/badge.svg?branch=develop&service=github)](https://coveralls.io/github/CouchPotato/CouchPotatoServer?branch=develop)
+[![Build Status](https://travis-ci.org/CouchPotato/CouchPotatoServer.svg?branch=master)](https://travis-ci.org/CouchPotato/CouchPotatoServer)
+[![Coverage Status](https://coveralls.io/repos/CouchPotato/CouchPotatoServer/badge.svg?branch=master&service=github)](https://coveralls.io/github/CouchPotato/CouchPotatoServer?branch=master)
 
 CouchPotato (CP) is an automatic NZB and torrent downloader. You can keep a "movies I want"-list and it will search for NZBs/torrents of these movies every X hours.
 Once a movie is found, it will send it to SABnzbd or download the torrent to a specified directory.
@@ -13,7 +13,7 @@ Once a movie is found, it will send it to SABnzbd or download the torrent to a s
 
 CouchPotatoServer can be run from source. This will use *git* as updater, so make sure that is installed.
 
-Windows, see [the CP forum](http://couchpota.to/forum/showthread.php?tid=14) for more details:
+Windows, see [the CP forum](http://couchpota.to/forum/viewtopic.php?t=14) for more details:
 
 * Install [Python 2.7](http://www.python.org/download/releases/2.7.3/)
 * Then install [PyWin32 2.7](http://sourceforge.net/projects/pywin32/files/pywin32/Build%20217/) and [GIT](http://git-scm.com/)
