@@ -121,7 +121,7 @@ class Base(TorrentProvider):
 
         url = url.replace('newpct.com', 'tumejortorrent.com')
         data = self.getHTMLData(url)
-        url = re.search(r'http://www.tvsinpagar.com/descargar-torrent/\d+_[^\"]+', data, re.DOTALL).group()
+        url = re.search(r'http://tvsinpagar\.com/descargar-torrent/\d+_[^\"]+', data, re.DOTALL).group()
 
         return url
 
